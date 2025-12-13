@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GoORMHelperCache">
+    <option name="scannedPathMapping">
+      <map>
+        <entry key="file://$PROJECT_DIR$/config/db.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1763932864688" />
+            </ScannedPath>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="lastTimeChecked" value="1765330045743" />
+  </component>
+</project>
