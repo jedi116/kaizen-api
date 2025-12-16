@@ -1,5 +1,5 @@
 # Makefile
-.PHONY: help install dev build migrate-diff migrate-apply-local migrate-apply-staging migrate-apply-prod migrate-status test clean
+.PHONY: help install build run dev migrate-diff migrate-apply-local migrate-apply-staging migrate-apply-prod migrate-status migrate-lint test test-coverage clean docker-build docker-run
 
 # Load environment variables
 include .env
@@ -15,47 +15,55 @@ install: ## Install dependencies
 	go mod download
 	go mod tidy
 
-#dev: ## Run development server with hot reload
-	#go run cmd/server/main.go
-
 build: ## Build the application
-	go build -o bin/api cmd/api/main.go
+	go build -o bin/server cmd/server/main.go
 
 run: ## Run the application
-	go run cmd/api/main.go
+	go run cmd/server/main.go
 
-# Migration commands
-migrate-diff: ## Create a new migration (usage: make migrate-diff)
-	@read -p "Migration name: " name; \
-	atlas migrate diff $$name --env local
+dev: ## Run development server with hot reload (requires air)
+	@which air > /dev/null || (echo "Installing air..." && go install github.com/air-verse/air@latest)
+	air
+
+# Migration commands (using Atlas OSS with GORM provider)
+migrate-diff: ## Create a new migration (usage: make migrate-diff name=migration_name)
+	@go run -mod=mod ariga.io/atlas-provider-gorm load --path ./internal/models --dialect postgres > /tmp/gorm_schema.sql
+	atlas migrate diff $(name) \
+		--dir "file://migrations" \
+		--to "file:///tmp/gorm_schema.sql" \
+		--dev-url "$(DATABASE_URL)"
 
 migrate-apply-local: ## Apply migrations to local database
-	atlas migrate apply --env local
+	atlas migrate apply \
+		--dir "file://migrations" \
+		--url "$(DATABASE_URL)"
 
 migrate-apply-staging: ## Apply migrations to staging database
-	atlas migrate apply --env staging
+	atlas migrate apply \
+		--dir "file://migrations" \
+		--url "$(NEON_STAGING_DATABASE_URL)"
 
 migrate-apply-prod: ## Apply migrations to production database
 	@echo "⚠️  WARNING: Applying to PRODUCTION"
 	@read -p "Type 'yes' to confirm: " confirm; \
 	if [ "$$confirm" = "yes" ]; then \
-		atlas migrate apply --env production; \
+		atlas migrate apply \
+			--dir "file://migrations" \
+			--url "$(NEON_PROD_DATABASE_URL)"; \
 	else \
 		echo "Cancelled"; \
 	fi
 
-migrate-status: ## Check migration status across all environments
-	@echo "=== LOCAL ==="
-	@atlas migrate status --env local || true
-	@echo ""
-	@echo "=== STAGING ==="
-	@atlas migrate status --env staging || true
-	@echo ""
-	@echo "=== PRODUCTION ==="
-	@atlas migrate status --env production || true
+migrate-status: ## Check migration status
+	atlas migrate status \
+		--dir "file://migrations" \
+		--url "$(DATABASE_URL)"
 
 migrate-lint: ## Lint migrations for potential issues
-	atlas migrate lint --env local --latest 1
+	atlas migrate lint \
+		--dir "file://migrations" \
+		--dev-url "$(DATABASE_URL)" \
+		--latest 1
 
 # Testing
 test: ## Run tests
