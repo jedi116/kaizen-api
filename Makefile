@@ -1,5 +1,5 @@
 # Makefile
-.PHONY: help install build run dev migrate-diff migrate-apply-local migrate-apply-staging migrate-apply-prod migrate-status migrate-lint test test-coverage clean docker-build docker-run
+.PHONY: help install build run dev swagger migrate-diff migrate-apply-local migrate-apply-staging migrate-apply-prod migrate-status migrate-lint test test-coverage clean docker-build docker-run
 
 # Load environment variables
 include .env
@@ -25,6 +25,11 @@ dev: ## Run development server with hot reload (requires air)
 	@which air > /dev/null || (echo "Installing air..." && go install github.com/air-verse/air@latest)
 	air
 
+# Documentation
+swagger: ## Generate swagger API documentation
+	@which swag > /dev/null || go install github.com/swaggo/swag/cmd/swag@latest
+	$(shell go env GOPATH)/bin/swag init -g cmd/server/main.go -o docs --parseDependency --parseInternal
+
 # Migration commands (using Atlas OSS with GORM provider)
 migrate-diff: ## Create a new migration (usage: make migrate-diff name=migration_name)
 	@go run -mod=mod ariga.io/atlas-provider-gorm load --path ./internal/models --dialect postgres > /tmp/gorm_schema.sql
@@ -36,12 +41,14 @@ migrate-diff: ## Create a new migration (usage: make migrate-diff name=migration
 migrate-apply-local: ## Apply migrations to local database
 	atlas migrate apply \
 		--dir "file://migrations" \
-		--url "$(DATABASE_URL)"
+		--url "$(DATABASE_URL)" \
+		--revisions-schema public \
 
 migrate-apply-staging: ## Apply migrations to staging database
 	atlas migrate apply \
 		--dir "file://migrations" \
-		--url "$(NEON_STAGING_DATABASE_URL)"
+		--url "$(NEON_STAGING_DATABASE_URL)" \
+		--revisions-schema public
 
 migrate-apply-prod: ## Apply migrations to production database
 	@echo "⚠️  WARNING: Applying to PRODUCTION"
@@ -49,7 +56,8 @@ migrate-apply-prod: ## Apply migrations to production database
 	if [ "$$confirm" = "yes" ]; then \
 		atlas migrate apply \
 			--dir "file://migrations" \
-			--url "$(NEON_PROD_DATABASE_URL)"; \
+			--url "$(NEON_PROD_DATABASE_URL)" \
+			--revisions-schema public
 	else \
 		echo "Cancelled"; \
 	fi

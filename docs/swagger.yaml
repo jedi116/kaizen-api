@@ -1,0 +1,502 @@
+basePath: /api
+definitions:
+  github_com_jedi116_kaizen-api_internal_auth.TokenPair:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  github_com_jedi116_kaizen-api_internal_models.APIKey:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      expires_at:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      key:
+        type: string
+      last_used_at:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  github_com_jedi116_kaizen-api_internal_models.FinanceCategory:
+    properties:
+      color:
+        description: Hex color for UI (e.g., "#FF5733")
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      description:
+        description: Optional description
+        type: string
+      icon:
+        description: "Icon name or emoji (e.g., \"\U0001F354\", \"\U0001F4B0\")"
+        type: string
+      id:
+        type: integer
+      is_active:
+        description: Soft disable without deleting
+        type: boolean
+      journals:
+        description: Has many journals
+        items:
+          $ref: '#/definitions/github_com_jedi116_kaizen-api_internal_models.FinanceJournal'
+        type: array
+      name:
+        description: e.g., "Groceries", "Salary", "Entertainment"
+        type: string
+      type:
+        description: '"income" or "expense"'
+        type: string
+      updatedAt:
+        type: string
+      user_id:
+        description: Which user owns this category
+        type: integer
+    type: object
+  github_com_jedi116_kaizen-api_internal_models.FinanceJournal:
+    properties:
+      amount:
+        description: Transaction amount (always positive)
+        type: number
+      category:
+        allOf:
+        - $ref: '#/definitions/github_com_jedi116_kaizen-api_internal_models.FinanceCategory'
+        description: Belongs to a category
+      category_id:
+        description: Which category (Food, Rent, etc.)
+        type: integer
+      createdAt:
+        type: string
+      date:
+        description: Transaction date (for daily tracking)
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      description:
+        description: Optional detailed notes
+        type: string
+      id:
+        type: integer
+      is_recurring:
+        description: Is this a recurring transaction?
+        type: boolean
+      location:
+        description: Where transaction occurred (optional)
+        type: string
+      payment_method:
+        description: '"cash", "credit_card", "bank_transfer", etc.'
+        type: string
+      receipt_url:
+        description: Attachments (optional - for receipts)
+        type: string
+      title:
+        description: e.g., "Grocery shopping at Walmart"
+        type: string
+      type:
+        description: '"income" or "expense"'
+        type: string
+      updatedAt:
+        type: string
+      user_id:
+        description: Which user made this transaction
+        type: integer
+    type: object
+  github_com_jedi116_kaizen-api_internal_models.User:
+    properties:
+      api_keys:
+        items:
+          $ref: '#/definitions/github_com_jedi116_kaizen-api_internal_models.APIKey'
+        type: array
+      categories:
+        description: Relationships
+        items:
+          $ref: '#/definitions/github_com_jedi116_kaizen-api_internal_models.FinanceCategory'
+        type: array
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      email:
+        type: string
+      email_verified:
+        type: boolean
+      id:
+        type: integer
+      journals:
+        items:
+          $ref: '#/definitions/github_com_jedi116_kaizen-api_internal_models.FinanceJournal'
+        type: array
+      last_login_at:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+  internal_handlers.APIKeyResponse:
+    properties:
+      created_at:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      name:
+        type: string
+    type: object
+  internal_handlers.AuthResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+      user:
+        $ref: '#/definitions/internal_handlers.UserProfile'
+    type: object
+  internal_handlers.CreateAPIKeyRequest:
+    properties:
+      expires_at:
+        example: "2025-12-31T23:59:59Z"
+        type: string
+      name:
+        example: Mobile App
+        type: string
+    required:
+    - name
+    type: object
+  internal_handlers.ErrorResponse:
+    properties:
+      error:
+        example: Something went wrong
+        type: string
+    type: object
+  internal_handlers.LoginRequest:
+    properties:
+      email:
+        example: john@example.com
+        type: string
+      password:
+        example: password123
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  internal_handlers.MessageResponse:
+    properties:
+      message:
+        example: Success
+        type: string
+    type: object
+  internal_handlers.RegisterRequest:
+    properties:
+      email:
+        example: john@example.com
+        type: string
+      name:
+        example: John Doe
+        type: string
+      password:
+        example: password123
+        minLength: 8
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  internal_handlers.UpdateProfileRequest:
+    properties:
+      name:
+        example: John Doe
+        type: string
+    required:
+    - name
+    type: object
+  internal_handlers.UserProfile:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact:
+    email: support@kaizen.io
+    name: API Support
+  description: Personal finance and productivity API
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Kaizen API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return tokens
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handlers.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      summary: Login user
+      tags:
+      - Authentication
+  /auth/logout:
+    post:
+      description: Revoke user tokens
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handlers.MessageResponse'
+      security:
+      - BearerAuth: []
+      summary: Logout user
+      tags:
+      - Authentication
+  /auth/logout-all:
+    post:
+      description: Revoke all user tokens
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handlers.MessageResponse'
+      security:
+      - BearerAuth: []
+      summary: Logout from all devices
+      tags:
+      - Authentication
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Get new access token using refresh token
+      parameters:
+      - description: Refresh token (optional if using cookies)
+        in: body
+        name: refresh_token
+        schema:
+          properties:
+            refresh_token:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_jedi116_kaizen-api_internal_auth.TokenPair'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      summary: Refresh access token
+      tags:
+      - Authentication
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account
+      parameters:
+      - description: Registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_handlers.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      summary: Register a new user
+      tags:
+      - Authentication
+  /users/api-keys:
+    get:
+      description: Get all API keys for the user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_jedi116_kaizen-api_internal_models.APIKey'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List API keys
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Create a new API key for the user
+      parameters:
+      - description: API key details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.CreateAPIKeyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_handlers.APIKeyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create API key
+      tags:
+      - Users
+  /users/api-keys/{id}:
+    delete:
+      description: Delete an API key
+      parameters:
+      - description: API Key ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handlers.MessageResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete API key
+      tags:
+      - Users
+  /users/me:
+    get:
+      description: Get current user profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_jedi116_kaizen-api_internal_models.User'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user profile
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Update current user profile
+      parameters:
+      - description: Profile data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_jedi116_kaizen-api_internal_models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update user profile
+      tags:
+      - Users
+securityDefinitions:
+  ApiKeyAuth:
+    description: Enter your API key
+    in: header
+    name: X-API-Key
+    type: apiKey
+  BearerAuth:
+    description: 'Enter your bearer token in the format: Bearer <token>'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

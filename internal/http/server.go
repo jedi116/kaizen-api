@@ -2,8 +2,11 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/gorm"
 
+	_ "github.com/jedi116/kaizen-api/docs"
 	"github.com/jedi116/kaizen-api/internal/auth"
 	"github.com/jedi116/kaizen-api/internal/handlers"
 )
@@ -24,6 +27,9 @@ func (s KaizenServer) RegisterRoutes() {
 			"message": "pong",
 		})
 	})
+
+	// Swagger documentation
+	s.GinEngine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Initialize handlers
 	authHandler := &handlers.AuthHandler{DB: s.DB}

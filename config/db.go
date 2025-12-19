@@ -13,8 +13,8 @@ import (
 
 var DB *gorm.DB
 
-// Connect initializes the database connection
-func Connect() error {
+// ConnectToDataBase initializes the database connection
+func ConnectToDataBase() error {
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
 		return fmt.Errorf("DATABASE_URL environment variable not set")

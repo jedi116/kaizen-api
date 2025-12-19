@@ -1,3 +1,27 @@
+// @title Kaizen API
+// @version 1.0
+// @description Personal finance and productivity API
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.email support@kaizen.io
+
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+
+// @host localhost:8000
+// @BasePath /api
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Enter your bearer token in the format: Bearer <token>
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name X-API-Key
+// @description Enter your API key
+
 package main
 
 import (
@@ -18,7 +42,7 @@ func main() {
 	}
 
 	// Connect to database
-	if err := config.Connect(); err != nil {
+	if err := config.ConnectToDataBase(); err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
 
