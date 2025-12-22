@@ -50,6 +50,7 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 	}
 
 	var user models.User
+	println(userID)
 	if err := h.DB.First(&user, userID).Error; err != nil {
 		c.JSON(http.StatusNotFound, ErrorResponse{Error: "User not found"})
 		return

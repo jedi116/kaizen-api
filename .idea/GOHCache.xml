@@ -52,6 +52,34 @@
             </set>
           </value>
         </entry>
+        <entry key="FinanceCategory">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/models/financeCategory.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="FinanceJournal">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/models/financeJournal.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="FinanceRepository">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/repository/finance.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="KaizenServer">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/http/server.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="LoginRequest">
           <value>
             <set>
@@ -122,7 +150,7 @@
         <entry key="file://$PROJECT_DIR$/cmd/server/main.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1766111205674" />
+              <option name="lastModified" value="1766116722900" />
             </ScannedPath>
           </value>
         </entry>
@@ -130,6 +158,13 @@
           <value>
             <ScannedPath>
               <option name="lastModified" value="1766111205696" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/docs/docs.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766116648476" />
             </ScannedPath>
           </value>
         </entry>
@@ -192,13 +227,25 @@
         <entry key="file://$PROJECT_DIR$/internal/handlers/user_handler.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765744079476" />
+              <option name="lastModified" value="1766291498283" />
               <option name="schema">
                 <list>
                   <option value="UserHandler" />
                   <option value="UpdateProfileRequest" />
                   <option value="CreateAPIKeyRequest" />
                   <option value="APIKeyResponse" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/http/server.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766116722900" />
+              <option name="schema">
+                <list>
+                  <option value="KaizenServer" />
                 </list>
               </option>
             </ScannedPath>
@@ -228,6 +275,30 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/internal/models/financeCategory.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1763934417359" />
+              <option name="schema">
+                <list>
+                  <option value="FinanceCategory" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/models/financeJournal.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1763934463577" />
+              <option name="schema">
+                <list>
+                  <option value="FinanceJournal" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/internal/models/token.go">
           <value>
             <ScannedPath>
@@ -235,6 +306,18 @@
               <option name="schema">
                 <list>
                   <option value="Token" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/repository/finance.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766363963376" />
+              <option name="schema">
+                <list>
+                  <option value="FinanceRepository" />
                 </list>
               </option>
             </ScannedPath>
@@ -251,6 +334,10 @@
         <entry key="claims" value="Claims" />
         <entry key="create_api_key_request" value="CreateAPIKeyRequest" />
         <entry key="error_response" value="ErrorResponse" />
+        <entry key="finance_category" value="FinanceCategory" />
+        <entry key="finance_journal" value="FinanceJournal" />
+        <entry key="finance_repository" value="FinanceRepository" />
+        <entry key="kaizen_server" value="KaizenServer" />
         <entry key="login_request" value="LoginRequest" />
         <entry key="message_response" value="MessageResponse" />
         <entry key="register_request" value="RegisterRequest" />
@@ -262,6 +349,6 @@
         <entry key="user_profile" value="UserProfile" />
       </map>
     </option>
-    <option name="lastTimeChecked" value="1765330045743" />
+    <option name="lastTimeChecked" value="1766292399477" />
   </component>
 </project>

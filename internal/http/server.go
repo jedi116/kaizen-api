@@ -34,6 +34,8 @@ func (s KaizenServer) RegisterRoutes() {
 	// Initialize handlers
 	authHandler := &handlers.AuthHandler{DB: s.DB}
 	userHandler := &handlers.UserHandler{DB: s.DB}
+	categoryHandler := &handlers.FinanceCategoryHandler{DB: s.DB}
+	journalHandler := &handlers.FinanceJournalHandler{DB: s.DB}
 
 	// API routes
 	api := s.GinEngine.Group("/api")
@@ -63,5 +65,28 @@ func (s KaizenServer) RegisterRoutes() {
 		usersGroup.POST("/api-keys", userHandler.CreateAPIKey)
 		usersGroup.GET("/api-keys", userHandler.ListAPIKeys)
 		usersGroup.DELETE("/api-keys/:id", userHandler.DeleteAPIKey)
+	}
+
+	// Finance Category routes (protected - requires JWT)
+	categoriesGroup := api.Group("/categories")
+	categoriesGroup.Use(auth.JWTAuthMiddleware(s.DB))
+	{
+		categoriesGroup.POST("", categoryHandler.CreateCategory)
+		categoriesGroup.GET("", categoryHandler.ListCategories)
+		categoriesGroup.GET("/:id", categoryHandler.GetCategory)
+		categoriesGroup.PUT("/:id", categoryHandler.UpdateCategory)
+		categoriesGroup.DELETE("/:id", categoryHandler.DeleteCategory)
+	}
+
+	// Finance Journal routes (protected - requires JWT)
+	journalsGroup := api.Group("/journals")
+	journalsGroup.Use(auth.JWTAuthMiddleware(s.DB))
+	{
+		journalsGroup.POST("", journalHandler.CreateJournal)
+		journalsGroup.GET("", journalHandler.ListJournals)
+		journalsGroup.GET("/summary", journalHandler.GetSummary)
+		journalsGroup.GET("/:id", journalHandler.GetJournal)
+		journalsGroup.PUT("/:id", journalHandler.UpdateJournal)
+		journalsGroup.DELETE("/:id", journalHandler.DeleteJournal)
 	}
 }

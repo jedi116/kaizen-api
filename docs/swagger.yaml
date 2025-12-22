@@ -188,11 +188,103 @@ definitions:
     required:
     - name
     type: object
+  internal_handlers.CreateCategoryRequest:
+    properties:
+      color:
+        example: '#FF5733'
+        type: string
+      description:
+        example: Food and household items
+        type: string
+      icon:
+        example: "\U0001F6D2"
+        type: string
+      name:
+        example: Groceries
+        type: string
+      type:
+        enum:
+        - income
+        - expense
+        example: expense
+        type: string
+    required:
+    - name
+    - type
+    type: object
+  internal_handlers.CreateJournalRequest:
+    properties:
+      amount:
+        example: 25.5
+        type: number
+      category_id:
+        example: 1
+        type: integer
+      date:
+        example: "2025-01-15"
+        type: string
+      description:
+        example: Weekly groceries at Walmart
+        type: string
+      is_recurring:
+        example: false
+        type: boolean
+      location:
+        example: Walmart
+        type: string
+      payment_method:
+        example: credit_card
+        type: string
+      receipt_url:
+        example: https://example.com/receipt.jpg
+        type: string
+      title:
+        example: Grocery shopping
+        type: string
+    required:
+    - amount
+    - category_id
+    - title
+    type: object
   internal_handlers.ErrorResponse:
     properties:
       error:
         example: Something went wrong
         type: string
+    type: object
+  internal_handlers.JournalListResponse:
+    properties:
+      journals:
+        items:
+          $ref: '#/definitions/github_com_jedi116_kaizen-api_internal_models.FinanceJournal'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total_count:
+        type: integer
+    type: object
+  internal_handlers.JournalSummary:
+    properties:
+      end_date:
+        example: "2025-01-31"
+        type: string
+      entry_count:
+        example: 42
+        type: integer
+      net_balance:
+        example: 1500
+        type: number
+      start_date:
+        example: "2025-01-01"
+        type: string
+      total_expense:
+        example: 3500
+        type: number
+      total_income:
+        example: 5000
+        type: number
     type: object
   internal_handlers.LoginRequest:
     properties:
@@ -228,6 +320,60 @@ definitions:
     - email
     - name
     - password
+    type: object
+  internal_handlers.UpdateCategoryRequest:
+    properties:
+      color:
+        example: '#FF5733'
+        type: string
+      description:
+        example: Food and household items
+        type: string
+      icon:
+        example: "\U0001F6D2"
+        type: string
+      is_active:
+        example: true
+        type: boolean
+      name:
+        example: Groceries
+        type: string
+      type:
+        enum:
+        - income
+        - expense
+        example: expense
+        type: string
+    type: object
+  internal_handlers.UpdateJournalRequest:
+    properties:
+      amount:
+        example: 25.5
+        type: number
+      category_id:
+        example: 1
+        type: integer
+      date:
+        example: "2025-01-15"
+        type: string
+      description:
+        example: Weekly groceries at Walmart
+        type: string
+      is_recurring:
+        example: false
+        type: boolean
+      location:
+        example: Walmart
+        type: string
+      payment_method:
+        example: credit_card
+        type: string
+      receipt_url:
+        example: https://example.com/receipt.jpg
+        type: string
+      title:
+        example: Grocery shopping
+        type: string
     type: object
   internal_handlers.UpdateProfileRequest:
     properties:
@@ -377,6 +523,400 @@ paths:
       summary: Register a new user
       tags:
       - Authentication
+  /categories:
+    get:
+      description: Get all categories for the current user with optional type filter
+      parameters:
+      - description: Filter by type (income or expense)
+        in: query
+        name: type
+        type: string
+      - description: Filter by active status
+        in: query
+        name: active
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_jedi116_kaizen-api_internal_models.FinanceCategory'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List finance categories
+      tags:
+      - Finance Categories
+    post:
+      consumes:
+      - application/json
+      description: Create a new income or expense category
+      parameters:
+      - description: Category details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.CreateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_jedi116_kaizen-api_internal_models.FinanceCategory'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a finance category
+      tags:
+      - Finance Categories
+  /categories/{id}:
+    delete:
+      description: Delete a category (soft delete)
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handlers.MessageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a finance category
+      tags:
+      - Finance Categories
+    get:
+      description: Get a single category by ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_jedi116_kaizen-api_internal_models.FinanceCategory'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a finance category
+      tags:
+      - Finance Categories
+    put:
+      consumes:
+      - application/json
+      description: Update an existing category
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Category data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.UpdateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_jedi116_kaizen-api_internal_models.FinanceCategory'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a finance category
+      tags:
+      - Finance Categories
+  /journals:
+    get:
+      description: Get all journal entries with optional filters
+      parameters:
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      - description: Filter by category ID
+        in: query
+        name: category_id
+        type: integer
+      - description: Filter by type (income or expense)
+        in: query
+        name: type
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 20, max: 100)'
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handlers.JournalListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List journal entries
+      tags:
+      - Finance Journals
+    post:
+      consumes:
+      - application/json
+      description: Create a new income or expense entry
+      parameters:
+      - description: Journal entry details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.CreateJournalRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_jedi116_kaizen-api_internal_models.FinanceJournal'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a journal entry
+      tags:
+      - Finance Journals
+  /journals/{id}:
+    delete:
+      description: Delete a journal entry (soft delete)
+      parameters:
+      - description: Journal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handlers.MessageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a journal entry
+      tags:
+      - Finance Journals
+    get:
+      description: Get a single journal entry by ID
+      parameters:
+      - description: Journal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_jedi116_kaizen-api_internal_models.FinanceJournal'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a journal entry
+      tags:
+      - Finance Journals
+    put:
+      consumes:
+      - application/json
+      description: Update an existing journal entry
+      parameters:
+      - description: Journal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Journal data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.UpdateJournalRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_jedi116_kaizen-api_internal_models.FinanceJournal'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a journal entry
+      tags:
+      - Finance Journals
+  /journals/summary:
+    get:
+      description: Get income, expense, and balance summary for a date range
+      parameters:
+      - description: 'Start date (YYYY-MM-DD, default: first day of current month)'
+        in: query
+        name: start_date
+        type: string
+      - description: 'End date (YYYY-MM-DD, default: today)'
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handlers.JournalSummary'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get financial summary
+      tags:
+      - Finance Journals
   /users/api-keys:
     get:
       description: Get all API keys for the user

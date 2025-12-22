@@ -185,9 +185,8 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 		auth.RevokeToken(refreshToken, h.DB)
 	}
 
-	// Clear cookies
-	c.SetCookie("access_token", "", -1, "/", "", false, true)
-	c.SetCookie("refresh_token", "", -1, "/", "", false, true)
+	// Clear cookies with SameSite
+	h.clearAuthCookies(c)
 
 	c.JSON(http.StatusOK, MessageResponse{Message: "Logged out successfully"})
 }
@@ -264,16 +263,23 @@ func (h *AuthHandler) LogoutAllDevices(c *gin.Context) {
 		return
 	}
 
-	// Clear cookies
-	c.SetCookie("access_token", "", -1, "/", "", false, true)
-	c.SetCookie("refresh_token", "", -1, "/", "", false, true)
+	// Clear cookies with SameSite
+	h.clearAuthCookies(c)
 
 	c.JSON(http.StatusOK, MessageResponse{Message: "Logged out from all devices"})
 }
 
-// Helper to set auth cookies
+// Helper to set auth cookies with CSRF protection
 func (h *AuthHandler) setAuthCookies(c *gin.Context, tokens *auth.TokenPair) {
 	secure := os.Getenv("ENV") == "production"
+
+	// Set SameSite mode for CSRF protection
+	// Strict in production, Lax in development (allows Swagger UI to work)
+	if secure {
+		c.SetSameSite(http.SameSiteStrictMode)
+	} else {
+		c.SetSameSite(http.SameSiteLaxMode)
+	}
 
 	c.SetCookie(
 		"access_token",
@@ -294,4 +300,18 @@ func (h *AuthHandler) setAuthCookies(c *gin.Context, tokens *auth.TokenPair) {
 		secure, // Secure only in production (HTTPS)
 		true,   // HttpOnly
 	)
+}
+
+// Helper to clear auth cookies with proper SameSite settings
+func (h *AuthHandler) clearAuthCookies(c *gin.Context) {
+	secure := os.Getenv("ENV") == "production"
+
+	if secure {
+		c.SetSameSite(http.SameSiteStrictMode)
+	} else {
+		c.SetSameSite(http.SameSiteLaxMode)
+	}
+
+	c.SetCookie("access_token", "", -1, "/", "", secure, true)
+	c.SetCookie("refresh_token", "", -1, "/", "", secure, true)
 }
