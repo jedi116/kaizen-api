@@ -1,6 +1,11 @@
 package http
 
 import (
+	"os"
+	"strings"
+	"time"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -20,7 +25,41 @@ func (s KaizenServer) Start() error {
 	return s.GinEngine.Run()
 }
 
+// configureCORS sets up CORS middleware with origins from ALLOWED_ORIGINS env var
+// ALLOWED_ORIGINS should be a comma-separated list of origins (e.g., "http://localhost:3000,https://myapp.com")
+func (s KaizenServer) configureCORS() {
+	originsEnv := os.Getenv("ALLOWED_ORIGINS")
+	if originsEnv == "" {
+		return // No CORS config if env var not set
+	}
+
+	var allowedOrigins []string
+	for _, origin := range strings.Split(originsEnv, ",") {
+		if trimmed := strings.TrimSpace(origin); trimmed != "" {
+			allowedOrigins = append(allowedOrigins, trimmed)
+		}
+	}
+
+	if len(allowedOrigins) == 0 {
+		return
+	}
+
+	config := cors.Config{
+		AllowOrigins:     allowedOrigins,
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Content-Length", "Accept", "Accept-Encoding", "Authorization", "X-API-Key", "X-Requested-With"},
+		ExposeHeaders:    []string{"Content-Length", "Content-Type"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}
+
+	s.GinEngine.Use(cors.New(config))
+}
+
 func (s KaizenServer) RegisterRoutes() {
+	// Configure CORS
+	s.configureCORS()
+
 	// Health check
 	s.GinEngine.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
